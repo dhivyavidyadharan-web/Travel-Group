@@ -23,11 +23,17 @@ export async function GET() {
         tables[t] = `error: ${(e as Error).message}`;
       }
     }
+    if (tables.responses === "ok") {
+      const { error } = await db().from("responses").select("edit_token_hash", { head: true }).limit(1);
+      tables.update_002 = error ? "missing: run supabase/migrations/002_draft_and_device_lock.sql" : "ok";
+    }
     const values = Object.values(tables);
     supabase = values.every((v) => v === "ok")
       ? "connected"
-      : values.some((v) => /does not exist|schema cache|PGRST205|42P01/i.test(v))
-        ? "connected, but tables are missing: run supabase/schema.sql in the SQL editor"
+      : tables.update_002?.startsWith("missing")
+        ? "connected, but the database update is missing: run supabase/migrations/002_draft_and_device_lock.sql"
+        : values.some((v) => /does not exist|schema cache|PGRST205|42P01/i.test(v))
+          ? "connected, but tables are missing: run supabase/schema.sql in the SQL editor"
         : "can't connect: check the URL and service_role key";
   }
 

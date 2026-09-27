@@ -15,4 +15,13 @@ export async function readBody<T extends z.ZodTypeAny>(req: Request, schema: T):
   return r.data;
 }
 
+/** A database error caused by the update SQL (002) not having been run yet. */
+export function needsMigration(e: unknown): boolean {
+  const msg = JSON.stringify(e ?? "");
+  return /trips_status_check|edit_token_hash/.test(msg);
+}
+
+export const MIGRATION_MSG =
+  "The database needs a one-time update: run supabase/migrations/002_draft_and_device_lock.sql in the Supabase SQL editor.";
+
 export type RouteCtx = { params: Promise<{ id: string }> };

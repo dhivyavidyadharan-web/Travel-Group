@@ -19,6 +19,7 @@ export async function POST(req: Request, { params }: RouteCtx) {
 
   const trip = await getTrip(id);
   if (!trip) return fail(404, "Trip not found.");
+  if (trip.status === "draft") return fail(409, "Create the trip link first, then collect answers.");
   const responses = (await getResponses(id)).filter((r) => trip.participants.includes(r.participant_name));
   if (responses.length < minResponses(trip.participants.length)) {
     return fail(409, `Wait for at least ${minResponses(trip.participants.length)} responses first.`);

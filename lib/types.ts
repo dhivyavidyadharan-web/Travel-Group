@@ -1,4 +1,4 @@
-export type TripStatus = "collecting" | "generated" | "decided";
+export type TripStatus = "draft" | "collecting" | "generated" | "decided";
 
 export interface Trip {
   id: string;

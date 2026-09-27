@@ -14,8 +14,8 @@ create table if not exists trips (
   participants      text[] not null,
   deadline          timestamptz,
   admin_key         text not null check (char_length(admin_key) >= 24),
-  status            text not null default 'collecting'
-                    check (status in ('collecting', 'generated', 'decided')),
+  status            text not null default 'draft'
+                    check (status in ('draft', 'collecting', 'generated', 'decided')),
   decided_option_id text,
   created_at        timestamptz not null default now(),
   check (date_end >= date_start)
@@ -33,6 +33,7 @@ create table if not exists responses (
   dealbreakers      text[] not null default '{}',
   dealbreaker_other text,
   note              text,
+  edit_token_hash   text,            -- sha256 of the private token held by the answering browser
   updated_at        timestamptz not null default now(),
   unique (trip_id, participant_name)
 );

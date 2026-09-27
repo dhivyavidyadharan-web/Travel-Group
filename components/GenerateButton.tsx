@@ -21,12 +21,13 @@ export default function GenerateButton({
 }) {
   const router = useRouter();
   const [busy, setBusy] = useState(false);
+  const [asking, setAsking] = useState(false);
   const [error, setError] = useState("");
   const pending = total - responded;
   const ready = responded >= needed;
 
   async function run() {
-    if (hasResult && !confirm("Replace the current options? Votes and any locked decision will be cleared.")) return;
+    setAsking(false);
     setBusy(true);
     setError("");
     try {
@@ -41,29 +42,39 @@ export default function GenerateButton({
 
   return (
     <div className="space-y-3">
-      {!ready && (
-        <p className="hint">
-          Unlocks once {needed} people have responded ({responded} so far).
-        </p>
-      )}
+      {!ready && <p className="hint">Unlocks once {needed} people have answered ({responded} so far).</p>}
       {ready && pending > 0 && !busy && (
-        <p className="rounded-xl bg-amber-50 p-3 text-sm text-amber-800">
-          {pending === 1 ? "1 person hasn't" : `${pending} people haven't`} responded. Their preferences won&apos;t be counted.
+        <p className="rounded-2xl bg-amber-50 p-3 text-sm text-amber-800">
+          {pending === 1 ? "1 person hasn't" : `${pending} people haven't`} answered. Their preferences won&apos;t be counted.
         </p>
       )}
-      <button className={hasResult ? "btn-secondary w-full" : "btn-primary w-full"} disabled={!ready || busy} onClick={run}>
-        {busy ? (
-          <>
-            <span className="size-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
-            Finding options that work for all {responded} of you…
-          </>
-        ) : hasResult ? (
-          "Regenerate options"
-        ) : (
-          "✨ Generate options"
-        )}
-      </button>
-      {error && <p className="rounded-xl bg-red-50 p-3 text-sm text-red-700">{error}</p>}
+      {asking ? (
+        <div className="space-y-2 rounded-2xl border border-accent/40 bg-accent-soft p-3">
+          <p className="text-sm">Replace the current options? Votes and any locked decision will be cleared.</p>
+          <div className="flex gap-2">
+            <button className="btn-primary min-h-10 px-4 text-sm" onClick={run}>Replace options</button>
+            <button className="btn-secondary min-h-10 px-4 text-sm" onClick={() => setAsking(false)}>Cancel</button>
+          </div>
+        </div>
+      ) : (
+        <button
+          className={hasResult ? "btn-secondary w-full" : "btn-primary w-full"}
+          disabled={!ready || busy}
+          onClick={() => (hasResult ? setAsking(true) : run())}
+        >
+          {busy ? (
+            <>
+              <span className="size-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
+              Finding options that work for all {responded} of you…
+            </>
+          ) : hasResult ? (
+            "Regenerate options"
+          ) : (
+            "✨ Generate options"
+          )}
+        </button>
+      )}
+      {error && <p className="rounded-2xl bg-red-50 p-3 text-sm text-red-700">{error}</p>}
     </div>
   );
 }

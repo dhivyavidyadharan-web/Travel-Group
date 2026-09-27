@@ -33,6 +33,7 @@ export async function createTrip(t: z.infer<typeof CreateTrip>) {
       participants: t.participants,
       deadline: t.deadline ?? null,
       admin_key: adminKey,
+      status: "draft",
     })
     .select("id")
     .single();

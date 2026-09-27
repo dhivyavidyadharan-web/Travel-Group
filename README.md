@@ -8,11 +8,10 @@ A group trip planner that replaces the endless WhatsApp thread. The coordinator 
 
 | Page | Who | What |
 | --- | --- | --- |
-| `/` | Coordinator | Create a trip: name, date window, trip length, people, deadline |
-| `/t/[id]/admin?key=…` | Coordinator only | Share link, response tracker (✅/⏳ + WhatsApp nudges), **Generate options**, **Lock final decision** |
-| `/t/[id]` | Everyone | 2-minute form, no login. Resubmitting updates your answer (never a duplicate) |
+| `/` | Coordinator | Create a trip: name, date window, trip length, people, deadline. It starts as a private **draft** |
+| `/t/[id]/admin?key=…` | Coordinator only | **Create trip link** (opens the draft), response tracker with WhatsApp nudges, **Generate options**, **Lock final decision** |
+| `/t/[id]` | Everyone | 2-minute form, no login, nothing prefilled. Each browser answers for one person only; coming back on the same phone edits your own answer |
 | `/t/[id]/results` | Everyone | Recommendation, group snapshot, 3 option cards, fit matrix, voting |
-| `/demo` | Anyone | One click: a trip with 5 friends who have all responded |
 
 **Split between code and AI**
 
@@ -21,12 +20,13 @@ A group trip planner that replaces the endless WhatsApp thread. The coordinator 
 - `lib/validate.ts` checks the reply with zod and **drops any option** that goes over the budget ceiling, falls outside the date windows or trip length, misses anyone's fit score, or breaks a personal travel rule (e.g. a flight for someone who won't fly, over 8h for someone who said no). It then works out `groupFit` (average) and `minFit` (lowest) itself. If fewer than 3 options survive, it retries once with the problems spelled out.
 - Results are saved, so they don't change on refresh. Regenerating is an explicit admin action and clears votes and any lock.
 
-**Access model:** there are no accounts. The trip ID (a UUID) is the share link, and a random 32-character admin key protects the dashboard. All database access goes through server code with the service-role key. RLS is on, with no public policies.
+**Access model:** there are no accounts. Nothing is visible at the share link until the coordinator creates it. The first submit ties that browser to the chosen name with a private httpOnly cookie (only its hash is stored), so a phone can answer and vote for one person only, and nobody can overwrite someone else's answers. The trip ID (a UUID) is the share link, and a random 32-character admin key protects the dashboard. All database access goes through server code with the service-role key. RLS is on, with no public policies.
 
 ## 1. Set up Supabase
 
 1. Create a project at [supabase.com](https://supabase.com).
 2. Open **SQL Editor → New query**, paste the contents of [`supabase/schema.sql`](supabase/schema.sql), and click **Run**.
+   - Already ran an older `schema.sql`? Also run [`supabase/migrations/002_draft_and_device_lock.sql`](supabase/migrations/002_draft_and_device_lock.sql) once.
 3. Go to **Project Settings → API Keys** and copy the **Project URL** (`https://<project-ref>.supabase.co`), the **publishable** key (`sb_publishable_…`, called **anon** on older projects) and the **secret** key (`sb_secret_…`, called **service_role** on older projects).
 
 ## 2. Get a Gemini key
@@ -50,7 +50,7 @@ Copy `.env.example` to `.env.local` for local development, then add the same var
 
 ```bash
 npm install
-npm run dev        # http://localhost:3000, then open /demo
+npm run dev        # http://localhost:3000
 npm test           # constraint and validation unit tests
 npm run build
 ```
@@ -77,7 +77,7 @@ vercel env add GEMINI_API_KEY
 vercel --prod
 ```
 
-After deploying, open `https://<your-app>.vercel.app/demo` to test the full flow.
+After deploying, open `https://<your-app>.vercel.app/api/health` to check the setup, then create a trip from the home page.
 
 ## Deliberately not built
 

@@ -2,8 +2,10 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import DecidedBanner from "@/components/DecidedBanner";
 import LiveRefresh from "@/components/LiveRefresh";
+import NotOpen from "@/components/NotOpen";
 import VotePanel from "@/components/VotePanel";
 import { getLatestResult, getSubmissions, getTrip, getVotes } from "@/lib/data";
+import { devicePerson } from "@/lib/identity";
 import { fmtDate, fmtRange } from "@/lib/dates";
 import { inr, inrRange, scoreTone } from "@/lib/format";
 import type { StoredConstraints, TripOption } from "@/lib/types";
@@ -14,15 +16,21 @@ export default async function ResultsPage({ params }: { params: Promise<{ tripId
   const { tripId } = await params;
   const trip = await getTrip(tripId);
   if (!trip) notFound();
-  const [result, votes, subs] = await Promise.all([getLatestResult(tripId), getVotes(tripId), getSubmissions(tripId)]);
+  if (trip.status === "draft") return <NotOpen />;
+  const [result, votes, subs, me] = await Promise.all([
+    getLatestResult(tripId),
+    getVotes(tripId),
+    getSubmissions(tripId),
+    devicePerson(tripId),
+  ]);
 
   if (!result || !result.options.length) {
     return (
       <div className="card mt-6 text-center">
         <p className="text-4xl">⏳</p>
-        <h1 className="mt-2 text-xl font-bold">Options aren&apos;t ready yet</h1>
+        <h1 className="mt-2 text-2xl font-extrabold">Options aren&apos;t ready yet</h1>
         <p className="hint mt-1">
-          {subs.length} of {trip.participants.length} have responded. The coordinator generates options once enough people are in.
+          {subs.length} of {trip.participants.length} have responded. The organiser generates options once enough people are in.
         </p>
         <Link href={`/t/${tripId}`} className="btn-primary mt-5">Add or edit my answers</Link>
         <LiveRefresh seconds={30} />
@@ -38,7 +46,7 @@ export default async function ResultsPage({ params }: { params: Promise<{ tripId
     <div className="space-y-5">
       <LiveRefresh />
       <div>
-        <h1 className="text-2xl font-bold">{trip.name}</h1>
+        <h1 className="text-3xl font-extrabold">{trip.name}</h1>
         <p className="hint">
           Based on {c.respondents.length} of {trip.participants.length} responses
           {c.missing.length > 0 && <> ({c.missing.join(", ")} didn&apos;t respond)</>}
@@ -49,13 +57,13 @@ export default async function ResultsPage({ params }: { params: Promise<{ tripId
         <DecidedBanner option={decided} />
       ) : (
         rec && (
-          <div className="rounded-2xl border-2 border-accent bg-accent-soft p-5">
+          <div className="rounded-3xl border-2 border-accent bg-accent-soft p-5">
             <p className="text-sm font-semibold tracking-wide text-accent-dark uppercase">Recommended</p>
-            <p className="mt-1 text-2xl font-bold">
+            <p className="mt-1 font-display text-2xl font-extrabold">
               Option {rec.id}: {rec.destination}
             </p>
             <p className="mt-1 text-ink/80">{result.recommendation_reason}</p>
-            <p className="hint mt-3">⏳ Waiting for the coordinator to lock the final decision.</p>
+            <p className="hint mt-3">⏳ Waiting for the organiser to lock the final decision.</p>
           </div>
         )
       )}
@@ -78,7 +86,8 @@ export default async function ResultsPage({ params }: { params: Promise<{ tripId
 
       <VotePanel
         tripId={tripId}
-        participants={trip.participants}
+        total={trip.participants.length}
+        me={me}
         options={result.options.map((o) => ({ id: o.id, destination: o.destination }))}
         votes={votes}
         closed={!!decided}
@@ -111,7 +120,7 @@ function Snapshot({ c }: { c: StoredConstraints }) {
   const topTypes = c.typeScores.filter((t) => t.total > 0).slice(0, 3);
   return (
     <section className="card space-y-4">
-      <h2 className="text-lg font-bold">Group snapshot</h2>
+      <h2 className="text-xl font-extrabold">Group snapshot</h2>
       <p className="hint -mt-3">The rules every option was built on.</p>
 
       <div>
@@ -149,7 +158,7 @@ function Snapshot({ c }: { c: StoredConstraints }) {
           <p className="text-sm font-semibold">🚫 Dealbreakers</p>
           <div className="mt-1 flex flex-wrap gap-1.5">
             {c.dealbreakers.map((d) => (
-              <span key={d.label} className="rounded-full bg-red-50 px-3 py-1 text-xs font-medium text-red-700">
+              <span key={d.label} className="rounded-full bg-coral-soft px-3 py-1 text-xs font-medium text-coral">
                 {d.label} <span className="opacity-70">· {d.setBy.join(", ")}</span>
               </span>
             ))}
@@ -173,7 +182,7 @@ function OptionCard({ o, recommended, decided, votes }: { o: TripOption; recomme
       <div className="flex items-start gap-3">
         <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-accent text-lg font-bold text-white">{o.id}</span>
         <div className="min-w-0 flex-1">
-          <h3 className="text-xl leading-tight font-bold">{o.destination}</h3>
+          <h3 className="text-2xl leading-tight font-extrabold">{o.destination}</h3>
           <p className="hint">{o.state}</p>
         </div>
         <div className="text-right">
@@ -242,7 +251,7 @@ function FitMatrix({ options, people }: { options: TripOption[]; people: string[
   return (
     <section className="card px-0 pb-3">
       <div className="px-5">
-        <h2 className="text-lg font-bold">Where everyone stands</h2>
+        <h2 className="text-xl font-extrabold">Where everyone stands</h2>
         <p className="hint">How well each option fits each person (0–10).</p>
         <div className="mt-2 flex gap-3 text-xs">
           <span className="flex items-center gap-1"><i className="size-3 rounded bg-emerald-200" /> 7–10 great</span>

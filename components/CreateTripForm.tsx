@@ -9,9 +9,9 @@ export default function CreateTripForm() {
   const [name, setName] = useState("");
   const [dateStart, setDateStart] = useState("");
   const [dateEnd, setDateEnd] = useState("");
-  const [minDays, setMinDays] = useState(3);
-  const [maxDays, setMaxDays] = useState(4);
-  const [people, setPeople] = useState<string[]>(["", "", "", "", ""]);
+  const [minDays, setMinDays] = useState("");
+  const [maxDays, setMaxDays] = useState("");
+  const [people, setPeople] = useState<string[]>(["", "", ""]);
   const [deadline, setDeadline] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
@@ -28,7 +28,7 @@ export default function CreateTripForm() {
         dateStart,
         dateEnd,
         minDays,
-        maxDays,
+        maxDays: maxDays || minDays,
         participants: people,
         // datetime-local is the coordinator's local time; send it with the offset.
         deadline: deadline ? new Date(deadline).toISOString() : null,
@@ -41,15 +41,19 @@ export default function CreateTripForm() {
   }
 
   return (
-    <form onSubmit={submit} className="card space-y-5">
-      <h2 className="text-xl font-bold">Start a trip</h2>
+    <form onSubmit={submit} className="card space-y-6">
       <div>
-        <label className="label" htmlFor="name">Trip name</label>
-        <input id="name" className="input" required maxLength={80} placeholder="College gang reunion" value={name} onChange={(e) => setName(e.target.value)} />
+        <h2 className="text-2xl font-extrabold">Start a trip</h2>
+        <p className="hint mt-1">Only you can see this until you create the share link.</p>
       </div>
 
       <div>
-        <span className="label">Date window</span>
+        <label className="label" htmlFor="name">Trip name</label>
+        <input id="name" className="input" required maxLength={80} placeholder="e.g. College gang reunion" value={name} onChange={(e) => setName(e.target.value)} />
+      </div>
+
+      <fieldset>
+        <legend className="label">When could the trip happen?</legend>
         <div className="grid grid-cols-2 gap-3">
           <label className="block">
             <span className="hint">Earliest start</span>
@@ -60,26 +64,26 @@ export default function CreateTripForm() {
             <input type="date" className="input mt-1" required min={dateStart || undefined} value={dateEnd} onChange={(e) => setDateEnd(e.target.value)} />
           </label>
         </div>
-      </div>
+      </fieldset>
 
-      <div>
-        <span className="label">Trip length (days)</span>
+      <fieldset>
+        <legend className="label">How many days?</legend>
         <div className="flex items-center gap-3">
-          <input type="number" aria-label="Minimum days" className="input w-24" min={1} max={30} value={minDays} onChange={(e) => setMinDays(Number(e.target.value))} />
+          <input type="number" inputMode="numeric" aria-label="Minimum days" placeholder="Min" className="input w-24" required min={1} max={30} value={minDays} onChange={(e) => setMinDays(e.target.value)} />
           <span className="text-muted">to</span>
-          <input type="number" aria-label="Maximum days" className="input w-24" min={minDays} max={30} value={maxDays} onChange={(e) => setMaxDays(Number(e.target.value))} />
+          <input type="number" inputMode="numeric" aria-label="Maximum days" placeholder="Max" className="input w-24" min={Number(minDays) || 1} max={30} value={maxDays} onChange={(e) => setMaxDays(e.target.value)} />
           <span className="text-muted">days</span>
         </div>
-      </div>
+      </fieldset>
 
-      <div>
-        <span className="label">Who&apos;s coming (include yourself)</span>
+      <fieldset>
+        <legend className="label">Who&apos;s coming? Include yourself</legend>
         <div className="space-y-2">
           {people.map((p, i) => (
             <div key={i} className="flex gap-2">
-              <input className="input" placeholder={`Friend ${i + 1}`} maxLength={40} value={p} onChange={(e) => setPerson(i, e.target.value)} />
+              <input className="input" placeholder={i === 0 ? "Your name" : `Friend ${i}`} maxLength={40} value={p} onChange={(e) => setPerson(i, e.target.value)} />
               {people.length > 2 && (
-                <button type="button" aria-label="Remove" className="btn-secondary px-4" onClick={() => setPeople((l) => l.filter((_, k) => k !== i))}>
+                <button type="button" aria-label={`Remove row ${i + 1}`} className="btn-secondary px-4" onClick={() => setPeople((l) => l.filter((_, k) => k !== i))}>
                   ✕
                 </button>
               )}
@@ -89,17 +93,17 @@ export default function CreateTripForm() {
         <button type="button" className="mt-2 text-sm font-semibold text-accent" onClick={() => setPeople((l) => [...l, ""])}>
           + Add someone
         </button>
-      </div>
+      </fieldset>
 
       <div>
-        <label className="label" htmlFor="deadline">Response deadline</label>
+        <label className="label" htmlFor="deadline">Reply by (optional)</label>
         <input id="deadline" type="datetime-local" className="input" value={deadline} onChange={(e) => setDeadline(e.target.value)} />
-        <p className="hint mt-1">People can edit their answers until then.</p>
+        <p className="hint mt-1">People can change their answers until then.</p>
       </div>
 
-      {error && <p className="rounded-xl bg-red-50 p-3 text-sm text-red-700">{error}</p>}
+      {error && <p className="rounded-2xl bg-red-50 p-3 text-sm text-red-700">{error}</p>}
       <button className="btn-primary w-full" disabled={busy}>
-        {busy ? "Creating…" : "Create trip & get the link"}
+        {busy ? "Saving…" : "Save trip"}
       </button>
     </form>
   );
