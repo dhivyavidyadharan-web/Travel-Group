@@ -1,14 +1,48 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { post } from "@/lib/api";
+
+const pad = (n: number) => String(n).padStart(2, "0");
+const iso = (d: Date) => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+const MONTHS = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+
+/** Today and the last allowed date (3 months out), in the organiser's local time. */
+function planningWindow() {
+  const today = new Date();
+  const limit = new Date(today.getFullYear(), today.getMonth() + 3, today.getDate());
+  // This month and the next two/three, each clipped to [today, limit].
+  const months: { label: string; start: string; end: string }[] = [];
+  for (let i = 0; i < 4; i++) {
+    const first = new Date(today.getFullYear(), today.getMonth() + i, 1);
+    const last = new Date(today.getFullYear(), today.getMonth() + i + 1, 0);
+    const start = first < today ? today : first;
+    const end = last > limit ? limit : last;
+    if (start <= end) months.push({ label: MONTHS[first.getMonth()], start: iso(start), end: iso(end) });
+  }
+  return { today: iso(today), limit: iso(limit), months };
+}
 
 export default function CreateTripForm() {
   const router = useRouter();
   const [name, setName] = useState("");
   const [dateStart, setDateStart] = useState("");
   const [dateEnd, setDateEnd] = useState("");
+  const [win, setWin] = useState<ReturnType<typeof planningWindow>>({ today: "", limit: "", months: [] });
+  // Uses the phone's own "today"; computed after mount so server and client HTML match.
+  useEffect(() => setWin(planningWindow()), []);
+  const [picked, setPicked] = useState<number[]>([]);
+
+  // Month chips select a continuous range of months.
+  function toggleMonth(i: number) {
+    const next = picked.includes(i) ? picked.filter((x) => x !== i) : [...picked, i];
+    const lo = Math.min(...next), hi = Math.max(...next);
+    const range = next.length ? Array.from({ length: hi - lo + 1 }, (_, k) => lo + k) : [];
+    setPicked(range);
+    setDateStart(range.length ? win.months[lo].start : "");
+    setDateEnd(range.length ? win.months[hi].end : "");
+  }
   const [minDays, setMinDays] = useState("");
   const [maxDays, setMaxDays] = useState("");
   const [people, setPeople] = useState<string[]>(["", "", ""]);
@@ -54,14 +88,33 @@ export default function CreateTripForm() {
 
       <fieldset>
         <legend className="label">When could the trip happen?</legend>
+        <p className="hint -mt-0.5 mb-2">Pick months, or set exact dates. Anything in the next 3 months.</p>
+        <div className="mb-3 flex flex-wrap gap-2">
+          {win.months.map((m, i) => (
+            <button key={m.label} type="button" aria-pressed={picked.includes(i)} className={`chip ${picked.includes(i) ? "chip-on" : ""}`} onClick={() => toggleMonth(i)}>
+              {m.label}
+            </button>
+          ))}
+          <button
+            type="button"
+            className={`chip ${dateStart === win.today && dateEnd === win.limit ? "chip-on" : ""}`}
+            onClick={() => {
+              setPicked(win.months.map((_, i) => i));
+              setDateStart(win.today);
+              setDateEnd(win.limit);
+            }}
+          >
+            Next 3 months
+          </button>
+        </div>
         <div className="grid grid-cols-2 gap-3">
           <label className="block">
             <span className="hint">Earliest start</span>
-            <input type="date" className="input mt-1" required value={dateStart} onChange={(e) => setDateStart(e.target.value)} />
+            <input type="date" className="input mt-1" required min={win.today || undefined} max={win.limit || undefined} value={dateStart} onChange={(e) => { setPicked([]); setDateStart(e.target.value); }} />
           </label>
           <label className="block">
             <span className="hint">Latest end</span>
-            <input type="date" className="input mt-1" required min={dateStart || undefined} value={dateEnd} onChange={(e) => setDateEnd(e.target.value)} />
+            <input type="date" className="input mt-1" required min={dateStart || win.today || undefined} max={win.limit || undefined} value={dateEnd} onChange={(e) => { setPicked([]); setDateEnd(e.target.value); }} />
           </label>
         </div>
       </fieldset>

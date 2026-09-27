@@ -1,6 +1,8 @@
 import "server-only";
 import { z } from "zod";
-import { isISODate, spanDays } from "./dates";
+import { addDays, isISODate, spanDays } from "./dates";
+
+const todayUTC = () => new Date().toISOString().slice(0, 10);
 import { db } from "./supabase";
 import { newAdminKey } from "./data";
 
@@ -17,7 +19,9 @@ export const CreateTrip = z
   .refine((t) => t.dateEnd >= t.dateStart, "The latest end date must be after the start date.")
   .refine((t) => t.maxDays >= t.minDays, "Max days must be at least min days.")
   .refine((t) => spanDays(t.dateStart, t.dateEnd) >= t.minDays, "The date window is shorter than the trip.")
-  .refine((t) => spanDays(t.dateStart, t.dateEnd) <= 366, "Keep the date window under a year.")
+  // Next 3 months only (a day of slack either side for time zones).
+  .refine((t) => t.dateStart >= addDays(todayUTC(), -1), "Pick dates from today onwards.")
+  .refine((t) => t.dateEnd <= addDays(todayUTC(), 93), "Pick dates within the next 3 months.")
   .refine((t) => t.participants.length >= 2 && t.participants.length <= 20, "Add 2–20 people.");
 
 export async function createTrip(t: z.infer<typeof CreateTrip>) {
