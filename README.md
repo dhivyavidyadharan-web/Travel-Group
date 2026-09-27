@@ -27,7 +27,7 @@ A group trip planner that replaces the endless WhatsApp thread. The coordinator 
 
 1. Create a project at [supabase.com](https://supabase.com).
 2. Open **SQL Editor → New query**, paste the contents of [`supabase/schema.sql`](supabase/schema.sql), and click **Run**.
-3. Go to **Project Settings → API** and copy the **Project URL**, the **anon** key and the **service_role** key.
+3. Go to **Project Settings → API Keys** and copy the **Project URL** (`https://<project-ref>.supabase.co`), the **publishable** key (`sb_publishable_…`, called **anon** on older projects) and the **secret** key (`sb_secret_…`, called **service_role** on older projects).
 
 ## 2. Get a Gemini key
 
@@ -40,8 +40,8 @@ Copy `.env.example` to `.env.local` for local development, then add the same var
 | Variable | Value |
 | --- | --- |
 | `NEXT_PUBLIC_SUPABASE_URL` | Supabase Project URL |
-| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Supabase anon key |
-| `SUPABASE_SERVICE_ROLE_KEY` | Supabase service_role key (server only, keep it secret) |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Supabase publishable (anon) key |
+| `SUPABASE_SERVICE_ROLE_KEY` | Supabase secret (service_role) key (server only, keep it secret) |
 | `GEMINI_API_KEY` | Gemini API key (server only) |
 | `GEMINI_MODEL` | `gemini-2.5-flash` (optional; this is the default) |
 | `GEMINI_MOCK` | Optional. `1` returns canned options without calling Gemini (handy for local UI work) |
@@ -54,6 +54,8 @@ npm run dev        # http://localhost:3000, then open /demo
 npm test           # constraint and validation unit tests
 npm run build
 ```
+
+Check your setup at `/api/health`: it reports whether Supabase is reachable, whether the tables exist, and which env vars are set (never their values).
 
 ## 5. Deploy to Vercel
 
