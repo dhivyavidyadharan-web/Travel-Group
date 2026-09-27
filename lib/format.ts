@@ -23,7 +23,7 @@ export function fmtDeadline(iso: string): string {
 
 /** Score colour: green 7–10, amber 4–6, red 0–3. */
 export function scoreTone(score: number): string {
-  if (score >= 7) return "bg-emerald-100 text-emerald-800";
-  if (score >= 4) return "bg-amber-100 text-amber-800";
-  return "bg-red-100 text-red-700";
+  if (score >= 7) return "bg-emerald-400/25 text-emerald-100 ring-1 ring-emerald-300/30";
+  if (score >= 4) return "bg-amber-400/25 text-amber-100 ring-1 ring-amber-300/30";
+  return "bg-red-400/25 text-red-100 ring-1 ring-red-300/30";
 }

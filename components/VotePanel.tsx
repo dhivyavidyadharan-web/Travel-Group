@@ -84,7 +84,7 @@ export default function VotePanel({
           );
         })}
       </ul>
-      {error && <p className="text-sm text-red-600">{error}</p>}
+      {error && <p className="text-sm text-red-300">{error}</p>}
       <p className="hint">{closed ? "Voting is closed." : "The organiser makes the final call."}</p>
     </section>
   );

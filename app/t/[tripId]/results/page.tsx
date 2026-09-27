@@ -8,6 +8,7 @@ import { getLatestResult, getSubmissions, getTrip, getVotes } from "@/lib/data";
 import { devicePerson } from "@/lib/identity";
 import { fmtDate, fmtRange } from "@/lib/dates";
 import { inr, inrRange, scoreTone } from "@/lib/format";
+import { photoFor } from "@/lib/scenery";
 import type { StoredConstraints, TripOption } from "@/lib/types";
 
 export const dynamic = "force-dynamic";
@@ -57,12 +58,12 @@ export default async function ResultsPage({ params }: { params: Promise<{ tripId
         <DecidedBanner option={decided} />
       ) : (
         rec && (
-          <div className="rounded-3xl border-2 border-accent bg-accent-soft p-5">
-            <p className="text-sm font-semibold tracking-wide text-accent-dark uppercase">Recommended</p>
+          <div className="card border-accent/40 bg-accent-soft">
+            <span className="eyebrow">★ Recommended</span>
             <p className="mt-1 font-display text-2xl font-extrabold">
               Option {rec.id}: {rec.destination}
             </p>
-            <p className="mt-1 text-ink/80">{result.recommendation_reason}</p>
+            <p className="mt-1 text-white/85">{result.recommendation_reason}</p>
             <p className="hint mt-3">⏳ Waiting for the organiser to lock the final decision.</p>
           </div>
         )
@@ -129,9 +130,9 @@ function Snapshot({ c }: { c: StoredConstraints }) {
           {c.commonDates.windows.map((w) => (
             <li key={w.start} className="text-sm">
               <b>{fmtRange(w.start, w.end)}</b> <span className="text-muted">({w.days} days)</span>
-              {w.missing.length > 0 && <span className="text-amber-700"> · {w.missing.join(", ")} can&apos;t make it</span>}
+              {w.missing.length > 0 && <span className="text-amber-200"> · {w.missing.join(", ")} can&apos;t make it</span>}
               {w.longWeekends?.map((h) => (
-                <span key={h.date} className="ml-2 inline-block rounded-full bg-sky-100 px-2 text-xs font-medium text-sky-800">
+                <span key={h.date} className="ml-2 inline-block rounded-full bg-sky-400/20 px-2 text-xs font-medium text-sky-100">
                   Long weekend: {h.name}, {fmtDate(h.date)}
                 </span>
               ))}
@@ -146,7 +147,7 @@ function Snapshot({ c }: { c: StoredConstraints }) {
           <b>{inr(c.budgetCeiling)}</b> per person <span className="text-muted">(the lowest max, so it&apos;s affordable for everyone)</span>
         </p>
         {c.budgetConflict && (
-          <p className="mt-1 text-sm text-amber-700">
+          <p className="mt-1 text-sm text-amber-200">
             Heads up: {c.budgetConflict.floorBy}&apos;s minimum ({inr(c.budgetFloor)}) is above {c.budgetConflict.ceilingBy}&apos;s max. We
             planned for the lower one.
           </p>
@@ -178,23 +179,29 @@ function Snapshot({ c }: { c: StoredConstraints }) {
 
 function OptionCard({ o, recommended, decided, votes }: { o: TripOption; recommended: boolean; decided: boolean; votes: number }) {
   return (
-    <article className={`card ${decided ? "ring-2 ring-accent" : recommended ? "ring-1 ring-accent/40" : ""}`}>
-      <div className="flex items-start gap-3">
-        <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-accent text-lg font-bold text-white">{o.id}</span>
-        <div className="min-w-0 flex-1">
-          <h3 className="text-2xl leading-tight font-extrabold">{o.destination}</h3>
-          <p className="hint">{o.state}</p>
+    <article className={`card overflow-hidden p-0 sm:p-0 ${decided ? "ring-2 ring-accent" : recommended ? "ring-1 ring-accent/50" : ""}`}>
+      <div
+        className="scenery relative flex min-h-56 flex-col justify-between p-4"
+        style={{ "--photo": photoFor(`${o.destination} ${o.state} ${o.pitch}`) } as React.CSSProperties}
+      >
+        <div className="flex items-start justify-between gap-3">
+          <span className="glass flex size-10 items-center justify-center rounded-2xl text-lg font-bold">{o.id}</span>
+          <div className="glass rounded-2xl px-3 py-1.5 text-right">
+            <p className="font-display text-xl leading-none font-extrabold">{o.groupFit}</p>
+            <p className="mt-0.5 text-[10px] tracking-wide text-white/70 uppercase">group fit</p>
+          </div>
         </div>
-        <div className="text-right">
-          <p className={`rounded-lg px-2 py-0.5 text-lg font-bold ${scoreTone(o.groupFit)}`}>{o.groupFit}</p>
-          <p className="mt-0.5 text-[11px] text-muted">group fit</p>
+        <div>
+          <h3 className="text-3xl leading-tight font-extrabold drop-shadow">{o.destination}</h3>
+          <p className="text-sm text-white/85">📍 {o.state}</p>
         </div>
       </div>
 
-      <div className="mt-3 flex flex-wrap gap-1.5 text-xs font-medium">
-        {decided && <span className="rounded-full bg-accent px-2.5 py-1 text-white">✅ Decided</span>}
-        {recommended && !decided && <span className="rounded-full bg-accent-soft px-2.5 py-1 text-accent-dark">★ Recommended</span>}
-        {o.longWeekend && <span className="rounded-full bg-sky-100 px-2.5 py-1 text-sky-800">{o.longWeekend}</span>}
+      <div className="p-5 sm:p-6">
+      <div className="flex flex-wrap gap-1.5 text-xs font-medium">
+        {decided && <span className="rounded-full bg-accent px-2.5 py-1 text-emerald-950">✅ Decided</span>}
+        {recommended && !decided && <span className="rounded-full bg-white px-2.5 py-1 text-[#0b241e]">★ Recommended</span>}
+        {o.longWeekend && <span className="rounded-full bg-sky-400/20 px-2.5 py-1 text-sky-100">{o.longWeekend}</span>}
         <span className="rounded-full bg-page px-2.5 py-1">{votes} {votes === 1 ? "vote" : "votes"}</span>
       </div>
 
@@ -243,6 +250,7 @@ function OptionCard({ o, recommended, decided, votes }: { o: TripOption; recomme
         </ul>
       </div>
       <p className="mt-3 text-[11px] text-muted">*Rough estimate incl. travel and stay. Lowest individual fit: {o.minFit}/10.</p>
+      </div>
     </article>
   );
 }
@@ -254,9 +262,9 @@ function FitMatrix({ options, people }: { options: TripOption[]; people: string[
         <h2 className="text-xl font-extrabold">Where everyone stands</h2>
         <p className="hint">How well each option fits each person (0–10).</p>
         <div className="mt-2 flex gap-3 text-xs">
-          <span className="flex items-center gap-1"><i className="size-3 rounded bg-emerald-200" /> 7–10 great</span>
-          <span className="flex items-center gap-1"><i className="size-3 rounded bg-amber-200" /> 4–6 okay</span>
-          <span className="flex items-center gap-1"><i className="size-3 rounded bg-red-200" /> 0–3 poor</span>
+          <span className="flex items-center gap-1"><i className="size-3 rounded bg-emerald-400/60" /> 7–10 great</span>
+          <span className="flex items-center gap-1"><i className="size-3 rounded bg-amber-300/60" /> 4–6 okay</span>
+          <span className="flex items-center gap-1"><i className="size-3 rounded bg-red-400/60" /> 0–3 poor</span>
         </div>
       </div>
       {/* Phone: one block per person, options stacked. */}
@@ -293,7 +301,7 @@ function FitMatrix({ options, people }: { options: TripOption[]; people: string[
         <table className="w-full min-w-[520px] border-separate border-spacing-0 text-sm">
           <thead>
             <tr>
-              <th className="sticky left-0 z-10 bg-white px-3 py-2 text-left font-semibold">Person</th>
+              <th className="sticky left-0 z-10 bg-[#143a31] px-3 py-2 text-left font-semibold">Person</th>
               {options.map((o) => (
                 <th key={o.id} className="px-2 py-2 text-left font-semibold">
                   {o.id}. {o.destination}
@@ -304,7 +312,7 @@ function FitMatrix({ options, people }: { options: TripOption[]; people: string[
           <tbody>
             {people.map((p) => (
               <tr key={p}>
-                <th className="sticky left-0 z-10 border-t border-line bg-white px-3 py-2 text-left align-top font-semibold">{p}</th>
+                <th className="sticky left-0 z-10 border-t border-line bg-[#143a31] px-3 py-2 text-left align-top font-semibold">{p}</th>
                 {options.map((o) => {
                   const f = o.fit.find((x) => x.participant === p);
                   return (
@@ -325,7 +333,7 @@ function FitMatrix({ options, people }: { options: TripOption[]; people: string[
               </tr>
             ))}
             <tr>
-              <th className="sticky left-0 z-10 border-t-2 border-line bg-white px-3 py-2 text-left">Group</th>
+              <th className="sticky left-0 z-10 border-t-2 border-line bg-[#143a31] px-3 py-2 text-left">Group</th>
               {options.map((o) => (
                 <td key={o.id} className="border-t-2 border-line px-2 py-2 text-xs">
                   avg <b className="text-sm">{o.groupFit}</b> · lowest <b className="text-sm">{o.minFit}</b>

@@ -47,7 +47,7 @@ export function LockButton({
         <button className="btn-secondary min-h-10 px-4 text-sm" onClick={() => setAsking(false)}>
           Cancel
         </button>
-        {error && <span className="text-sm text-red-600">{error}</span>}
+        {error && <span className="text-sm text-red-300">{error}</span>}
       </div>
     );
   }

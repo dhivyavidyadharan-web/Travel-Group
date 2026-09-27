@@ -60,7 +60,15 @@ export default async function AdminPage({
   return (
     <div className="space-y-5">
       <div className="space-y-3">
-        <p className="eyebrow">Coordinator dashboard</p>
+        <div className="flex items-center gap-3">
+          <span className="glass flex size-11 items-center justify-center rounded-full font-display text-lg font-extrabold text-accent">
+            {trip.participants[0]?.[0]?.toUpperCase() ?? "★"}
+          </span>
+          <div className="leading-tight">
+            <p className="text-xs text-muted">Organiser dashboard</p>
+            <p className="font-semibold">Hello, {trip.participants[0] ?? "organiser"}</p>
+          </div>
+        </div>
         <h1 className="text-3xl font-extrabold">{trip.name}</h1>
         <p className="hint">
           {fmtRange(trip.date_start, trip.date_end)} · {trip.min_days === trip.max_days ? trip.min_days : `${trip.min_days}–${trip.max_days}`} days ·{" "}
@@ -68,7 +76,7 @@ export default async function AdminPage({
           {trip.deadline && <> · replies due {fmtDeadline(trip.deadline)}{deadlinePassed(trip) && " (passed)"}</>}
         </p>
         <StatusSteps status={trip.status} />
-        <p className="rounded-2xl bg-amber-50 p-3 text-sm text-amber-800">
+        <p className="glass rounded-2xl p-3 text-sm text-amber-100">
           🔑 Bookmark this page. It&apos;s your private admin link, so don&apos;t share it.
         </p>
       </div>
@@ -145,7 +153,7 @@ export default async function AdminPage({
           <section className="card space-y-3">
             <h2 className="text-xl font-extrabold">Get trip options</h2>
             {result && changedSince.length > 0 && (
-              <p className="rounded-2xl bg-amber-50 p-3 text-sm text-amber-800">
+              <p className="rounded-2xl bg-amber-400/15 p-3 text-sm text-amber-100">
                 {newSinceResult.length > 0 ? `${newSinceResult.join(", ")} answered` : `${changedSince.join(", ")} changed their answers`}{" "}
                 after the options were made. Regenerate to include them.
               </p>

@@ -44,7 +44,7 @@ export default function GenerateButton({
     <div className="space-y-3">
       {!ready && <p className="hint">Unlocks once {needed} people have answered ({responded} so far).</p>}
       {ready && pending > 0 && !busy && (
-        <p className="rounded-2xl bg-amber-50 p-3 text-sm text-amber-800">
+        <p className="rounded-2xl bg-amber-400/15 p-3 text-sm text-amber-100">
           {pending === 1 ? "1 person hasn't" : `${pending} people haven't`} answered. Their preferences won&apos;t be counted.
         </p>
       )}
@@ -74,7 +74,7 @@ export default function GenerateButton({
           )}
         </button>
       )}
-      {error && <p className="rounded-2xl bg-red-50 p-3 text-sm text-red-700">{error}</p>}
+      {error && <p className="rounded-2xl bg-red-500/15 p-3 text-sm text-red-200">{error}</p>}
     </div>
   );
 }

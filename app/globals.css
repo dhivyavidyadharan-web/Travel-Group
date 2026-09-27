@@ -1,29 +1,27 @@
 @import "tailwindcss";
 
+/* Glass-over-landscape theme: frosted panels on a full-bleed valley photo. */
 @theme inline {
   --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
   --font-display: var(--font-bricolage), var(--font-geist-sans), ui-sans-serif, sans-serif;
-  --color-accent: #0f7a63;
-  --color-accent-dark: #0a5c4a;
-  --color-accent-soft: #e2f3ed;
-  --color-coral: #e0674b;
-  --color-coral-soft: #fdebe6;
-  --color-ink: #14211d;
-  --color-muted: #5a6b65;
-  --color-line: #e1e8e5;
-  --color-page: #f4f7f6;
+  --color-accent: #8be3b4;
+  --color-accent-dark: #d2f7e3;
+  --color-accent-soft: rgb(139 227 180 / 0.16);
+  --color-coral: #ffb8a6;
+  --color-coral-soft: rgb(255 140 110 / 0.16);
+  --color-ink: #f2faf6;
+  --color-muted: #b7cdc4;
+  --color-line: rgb(255 255 255 / 0.16);
+  --color-page: rgb(255 255 255 / 0.07);
+  --color-forest: #0b241e;
 }
 
 html {
-  color-scheme: light;
+  color-scheme: dark;
 }
 
 body {
-  background:
-    radial-gradient(1200px 500px at 100% -10%, #dff2eb 0%, transparent 60%),
-    radial-gradient(900px 400px at -10% 0%, #eef4fb 0%, transparent 55%),
-    var(--color-page);
-  background-attachment: fixed;
+  background: var(--color-forest);
   color: var(--color-ink);
 }
 
@@ -33,23 +31,42 @@ h1, h2, h3 {
   letter-spacing: -0.01em;
 }
 
+select option {
+  background: #10302a;
+  color: #f2faf6;
+}
+
+/* Layered so the gradient still shows if the photo can't load. */
+.scenery {
+  background-image:
+    linear-gradient(180deg, rgb(7 26 22 / 0.35) 0%, rgb(7 26 22 / 0.72) 45%, rgb(7 26 22 / 0.92) 100%),
+    var(--photo, none),
+    radial-gradient(120% 80% at 70% 0%, #2f6b57 0%, #143a31 45%, #0b241e 100%);
+  background-size: cover;
+  background-position: center;
+}
+
 @utility card {
-  @apply rounded-3xl border border-white/70 bg-white p-5 shadow-[0_1px_2px_rgba(16,40,32,0.05),0_12px_32px_-12px_rgba(16,40,32,0.12)] sm:p-6;
+  @apply rounded-[1.75rem] border border-white/15 bg-white/[0.08] p-5 shadow-[0_20px_50px_-20px_rgb(0_0_0/0.55),inset_0_1px_0_rgb(255_255_255/0.12)] backdrop-blur-2xl sm:p-6;
+}
+@utility glass {
+  @apply border border-white/15 bg-white/[0.08] backdrop-blur-2xl;
 }
 @utility btn {
-  @apply inline-flex min-h-12 items-center justify-center gap-2 rounded-2xl px-5 font-semibold transition
-    focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-accent/40
-    disabled:cursor-not-allowed disabled:opacity-50;
+  @apply inline-flex min-h-12 items-center justify-center gap-2 rounded-full px-6 font-semibold transition
+    focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-accent/60
+    disabled:cursor-not-allowed disabled:opacity-45;
 }
 @utility btn-primary {
-  @apply btn bg-accent text-white shadow-[0_6px_16px_-6px_rgba(15,122,99,0.6)] hover:bg-accent-dark active:scale-[0.99];
+  @apply btn border border-white/25 bg-gradient-to-b from-[#5fcf96] to-[#2b8a5f] text-white
+    shadow-[0_10px_30px_-8px_rgb(76_201_140/0.6),inset_0_1px_0_rgb(255_255_255/0.35)] hover:brightness-110 active:scale-[0.99];
 }
 @utility btn-secondary {
-  @apply btn border border-line bg-white text-ink hover:bg-page;
+  @apply btn border border-white/20 bg-white/10 text-ink backdrop-blur-xl hover:bg-white/15;
 }
 @utility input {
-  @apply min-h-12 w-full rounded-2xl border border-line bg-white px-4 text-base outline-none transition
-    placeholder:text-muted/60 focus:border-accent focus:ring-4 focus:ring-accent/15;
+  @apply min-h-12 w-full rounded-2xl border border-white/15 bg-white/[0.07] px-4 text-base text-ink outline-none transition
+    placeholder:text-white/40 focus:border-accent/70 focus:bg-white/10 focus:ring-4 focus:ring-accent/15;
 }
 @utility label {
   @apply mb-1.5 block text-sm font-semibold text-ink;
@@ -58,14 +75,14 @@ h1, h2, h3 {
   @apply text-sm text-muted;
 }
 @utility eyebrow {
-  @apply text-xs font-bold tracking-[0.12em] text-accent uppercase;
+  @apply inline-flex items-center gap-1.5 rounded-full border border-white/20 bg-white/10 px-3 py-1 text-[11px] font-bold tracking-[0.14em] text-accent-dark uppercase backdrop-blur-xl;
 }
 @utility chip {
-  @apply inline-flex min-h-11 items-center gap-1.5 rounded-full border border-line bg-white px-4 text-sm font-medium
-    transition select-none hover:border-accent/50 focus-visible:outline-3 focus-visible:outline-accent/40;
+  @apply inline-flex min-h-11 items-center gap-1.5 rounded-full border border-white/15 bg-white/[0.08] px-4 text-sm font-medium text-ink
+    backdrop-blur-xl transition select-none hover:bg-white/15 focus-visible:outline-3 focus-visible:outline-accent/60;
 }
 @utility chip-on {
-  @apply border-accent bg-accent-soft text-accent-dark;
+  @apply border-white bg-white text-[#0b241e] hover:bg-white;
 }
 
 @media (prefers-reduced-motion: reduce) {

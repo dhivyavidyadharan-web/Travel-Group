@@ -122,9 +122,9 @@ export default function DatePicker({
                         !enabled
                           ? "text-line"
                           : anchor === d
-                            ? "bg-accent-dark text-white ring-2 ring-accent/40"
+                            ? "bg-white text-[#0b241e] ring-2 ring-accent"
                             : on
-                              ? "bg-accent text-white"
+                              ? "bg-accent text-emerald-950"
                               : "bg-page hover:bg-accent-soft"
                       }`}
                     >

@@ -27,7 +27,7 @@ export default function PublishButton({ tripId, adminKey }: { tripId: string; ad
       >
         {busy ? "Creating link…" : "🔗 Create trip link"}
       </button>
-      {error && <p className="rounded-2xl bg-red-50 p-3 text-sm text-red-700">{error}</p>}
+      {error && <p className="rounded-2xl bg-red-500/15 p-3 text-sm text-red-200">{error}</p>}
     </div>
   );
 }

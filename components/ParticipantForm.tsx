@@ -206,8 +206,8 @@ export default function ParticipantForm({ tripId, participants, answered, me, mi
         <textarea id="note" aria-label="Note" className="input min-h-24 py-3" maxLength={300} placeholder={`"I'd love to see snow" or "must be back Monday morning"`} value={form.note} onChange={(e) => set("note", e.target.value)} />
       </Step>
 
-      {error && <p className="rounded-2xl bg-red-50 p-3 text-sm text-red-700">{error}</p>}
-      <div className="sticky bottom-3 z-10 rounded-3xl border border-line bg-white/90 p-3 shadow-lg backdrop-blur">
+      {error && <p className="rounded-2xl bg-red-500/15 p-3 text-sm text-red-200">{error}</p>}
+      <div className="sticky bottom-3 z-10 rounded-3xl border border-line bg-[#0b241e]/75 p-3 shadow-2xl backdrop-blur-2xl">
         <div className="mb-2 flex items-center justify-between px-1 text-xs font-semibold text-muted">
           <span>{doneCount} of 4 required steps done</span>
           <span className="flex gap-1">
